@@ -1,4 +1,4 @@
-onUndoimport React from 'react';
+import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
 import { Cell } from '../types';
 import { Theme } from '../constants/theme';
