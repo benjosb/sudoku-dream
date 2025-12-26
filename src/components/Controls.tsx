@@ -34,8 +34,8 @@ export const Controls: React.FC<Props> = ({
           const isHighlighted = highlightedNumber === num;
           
           return (
-            <TouchableOpacity
-              key={num}
+          <TouchableOpacity
+            key={num}
               disabled={isCompleted}
               style={[
                 styles.numberButton, 
@@ -44,10 +44,10 @@ export const Controls: React.FC<Props> = ({
                   opacity: isCompleted ? 0.3 : 1
                 }
               ]}
-              onPress={() => onNumberPress(num)}
-            >
-              <Text style={[styles.numberText, { color: theme.text }]}>{num}</Text>
-            </TouchableOpacity>
+            onPress={() => onNumberPress(num)}
+          >
+            <Text style={[styles.numberText, { color: theme.text }]}>{num}</Text>
+          </TouchableOpacity>
           );
         })}
       </View>
