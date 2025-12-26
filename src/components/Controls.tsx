@@ -10,6 +10,8 @@ interface Props {
   togglePencil: () => void;
   isPencilMode: boolean;
   theme: Theme;
+  completedNumbers?: number[]; // Optioneel gemaakt
+  highlightedNumber?: number | null; // Optioneel gemaakt
 }
 
 export const Controls: React.FC<Props> = ({ 
@@ -19,21 +21,35 @@ export const Controls: React.FC<Props> = ({
   onHint, 
   togglePencil, 
   isPencilMode, 
-  theme 
+  theme,
+  completedNumbers = [], // Default waarde
+  highlightedNumber = null // Default waarde
 }) => {
   return (
     <View style={styles.container}>
       {/* Cijfer knoppen */}
       <View style={styles.numberRow}>
-        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
-          <TouchableOpacity
-            key={num}
-            style={[styles.numberButton, { backgroundColor: theme.buttonBg }]}
-            onPress={() => onNumberPress(num)}
-          >
-            <Text style={[styles.numberText, { color: theme.text }]}>{num}</Text>
-          </TouchableOpacity>
-        ))}
+        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => {
+          const isCompleted = completedNumbers.includes(num);
+          const isHighlighted = highlightedNumber === num;
+          
+          return (
+            <TouchableOpacity
+              key={num}
+              disabled={isCompleted}
+              style={[
+                styles.numberButton, 
+                { 
+                  backgroundColor: isHighlighted ? theme.sameNumber : theme.buttonBg,
+                  opacity: isCompleted ? 0.3 : 1
+                }
+              ]}
+              onPress={() => onNumberPress(num)}
+            >
+              <Text style={[styles.numberText, { color: theme.text }]}>{num}</Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
 
       {/* Actie knoppen */}

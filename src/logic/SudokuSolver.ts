@@ -112,16 +112,19 @@ export const getSmartHint = (grid: Grid): Hint => {
     }
   }
 
-  // Fallback: Als we geen slimme strategie vinden, geven we gewoon een hint van een willekeurige cel
-  // (In een echte app zou je hier moeilijkere strategieën toevoegen zoals Pairs/Triples)
+  // Fallback: Als we geen slimme strategie vinden, zoek dan de EERSTE cel die leeg is en geef daar de OPLOSSING van terug.
+  // We moeten hier NIET zomaar een waarde gokken, maar de solution uit de cell gebruiken.
   for (let r = 0; r < 9; r++) {
     for (let c = 0; c < 9; c++) {
       if (grid[r][c].value === null) {
+         // CRITICAL FIX: Gebruik de solution van de cel, niet zomaar een kandidaat
+         const correctValue = grid[r][c].solution;
+         
          return {
             type: 'none',
             cell: [r, c],
-            value: grid[r][c].solution,
-            message: `Ik kan even geen slimme strategie vinden, maar in dit vakje hoort een ${grid[r][c].solution}.`
+            value: correctValue,
+            message: `Soms moet je gewoon even gokken (of heel diep nadenken!). Hier hoort een ${correctValue}.`
           };
       }
     }
