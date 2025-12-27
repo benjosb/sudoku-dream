@@ -7,7 +7,8 @@ import { SudokuCell } from './src/components/SudokuCell';
 import { Controls } from './src/components/Controls';
 import { COLORS, ThemeKey } from './src/constants/theme';
 
-import ConfettiCannon from 'react-native-confetti-cannon';
+import * as Localization from 'expo-localization';
+import { translations, Language } from './src/constants/translations';
 
 const { width } = Dimensions.get('window');
 // Bereken celgrootte (schermbreedte - padding) / 9
@@ -28,6 +29,11 @@ export default function App() {
   // Confetti ref
   const confettiRef = React.useRef<any>(null);
 
+  // Bepaal taal (nl of en)
+  const deviceLanguage = Localization.getLocales()[0]?.languageCode;
+  const lang: Language = deviceLanguage === 'nl' ? 'nl' : 'en';
+  const t = translations[lang];
+
   // Bepaal thema
   const theme = COLORS[currentTheme];
 
@@ -46,11 +52,11 @@ export default function App() {
   // Stop spel en ga terug naar menu
   const stopGame = () => {
     Alert.alert(
-      "Stoppen?",
-      "Wil je dit spel beëindigen en teruggaan naar het menu?",
+      t.stopTitle,
+      t.stopMessage,
       [
-        { text: "Nee, speel verder", style: "cancel" },
-        { text: "Ja, stop", style: "destructive", onPress: () => setGameStarted(false) }
+        { text: t.stopCancel, style: "cancel" },
+        { text: t.stopConfirm, style: "destructive", onPress: () => setGameStarted(false) }
       ]
     );
   };
@@ -60,7 +66,7 @@ export default function App() {
   if (gameStarted && (!grid || grid.length === 0)) {
     return (
       <View style={[styles.container, { backgroundColor: theme.background, justifyContent: 'center' }]}>
-        <Text style={{ color: theme.text }}>Sudoku wordt geladen...</Text>
+        <Text style={{ color: theme.text }}>{t.loading}</Text>
       </View>
     );
   }
@@ -146,7 +152,7 @@ export default function App() {
     if (isComplete) {
         setIsGameWon(true);
         if (confettiRef.current) confettiRef.current.start();
-        Alert.alert("GEWONNEN! 🎉", "Wat goed gedaan Noortje!");
+        Alert.alert(t.wonTitle, t.wonMessage);
     }
   };
 
@@ -179,24 +185,24 @@ export default function App() {
 
         // Als er al iets staat (wat geen error is), hoeven we geen hint te geven
         if (cell.value && !cell.isError) {
-             Alert.alert("Hint", "Dit vakje is al correct ingevuld!");
+             Alert.alert(t.hintTitle, t.cellCorrect);
              return;
         }
 
         // Als er een fout staat
         if (cell.value && cell.isError) {
-            Alert.alert("Hint", "Dit klopt niet helemaal... Probeer het eens te wissen.");
+            Alert.alert(t.hintTitle, t.cellError);
             return;
         }
 
         // Als hij leeg is, geef het antwoord (eerlijk)
         Alert.alert(
-            "Hulp Nodig?",
-            "Wil je weten welk getal hier hoort?",
+            t.hintAskTitle,
+            t.hintAskMessage,
             [
-                { text: "Nee, ik puzzel verder", style: "cancel" },
+                { text: t.hintAskNo, style: "cancel" },
                 { 
-                    text: "Ja, vertel het me", 
+                    text: t.hintAskYes, 
                     onPress: () => {
                         const newGrid = [...grid];
                         newGrid[r][c] = { ...newGrid[r][c], value: cell.solution as any, isError: false };
@@ -209,21 +215,21 @@ export default function App() {
     }
 
     // 2. Als er GEEN cel geselecteerd is, gebruik de slimme solver voor een algemene hint
-    const hint = getSmartHint(grid);
+    const hint = getSmartHint(grid, lang);
     
     if (hint.type === 'none') {
        // Hier komt de fallback tekst uit de solver (geen gokken meer!)
-       Alert.alert("Geen slimme zet gevonden", hint.message);
+       Alert.alert(t.hintNoSmartMove, hint.message);
        return;
     }
 
     Alert.alert(
-      "Strategische Hint",
+      t.hintTitle,
       hint.message,
       [
-        { text: "Oké, ik ga kijken!", style: "cancel" },
+        { text: t.hintBtnCancel, style: "cancel" },
         { 
-          text: "Vul in voor mij", 
+          text: t.hintBtnSolve, 
           onPress: () => {
             const [r, c] = hint.cell;
             const newGrid = [...grid];
@@ -246,26 +252,26 @@ export default function App() {
             source={require('./assets/logo.png')} 
             style={{ width: 150, height: 150, marginBottom: 20, borderRadius: 20 }} 
           />
-          <Text style={[styles.title, { color: theme.text, fontSize: 40, marginBottom: 10 }]}>Sudoku Dream</Text>
-          <Text style={{ color: theme.text, opacity: 0.7, marginBottom: 40 }}>Kies je niveau</Text>
+          <Text style={[styles.title, { color: theme.text, fontSize: 40, marginBottom: 10 }]}>{t.title}</Text>
+          <Text style={{ color: theme.text, opacity: 0.7, marginBottom: 40 }}>{t.chooseDifficulty}</Text>
           
           <TouchableOpacity style={[styles.menuButton, { backgroundColor: theme.buttonBg }]} onPress={() => startNewGame('easy')}>
-            <Text style={[styles.menuButtonText, { color: theme.text }]}>Makkelijk</Text>
+            <Text style={[styles.menuButtonText, { color: theme.text }]}>{t.easy}</Text>
           </TouchableOpacity>
           
           <TouchableOpacity style={[styles.menuButton, { backgroundColor: theme.buttonBg }]} onPress={() => startNewGame('medium')}>
-            <Text style={[styles.menuButtonText, { color: theme.text }]}>Gemiddeld</Text>
+            <Text style={[styles.menuButtonText, { color: theme.text }]}>{t.medium}</Text>
           </TouchableOpacity>
           
           <TouchableOpacity style={[styles.menuButton, { backgroundColor: theme.buttonBg }]} onPress={() => startNewGame('hard')}>
-            <Text style={[styles.menuButtonText, { color: theme.text }]}>Moeilijk</Text>
+            <Text style={[styles.menuButtonText, { color: theme.text }]}>{t.hard}</Text>
           </TouchableOpacity>
           
           <TouchableOpacity style={[styles.menuButton, { backgroundColor: theme.buttonBg }]} onPress={() => startNewGame('expert')}>
-            <Text style={[styles.menuButtonText, { color: theme.text }]}>Expert</Text>
+            <Text style={[styles.menuButtonText, { color: theme.text }]}>{t.expert}</Text>
           </TouchableOpacity>
 
-          <Text style={{ color: theme.text, marginTop: 40, marginBottom: 10 }}>Kies Thema</Text>
+          <Text style={{ color: theme.text, marginTop: 40, marginBottom: 10 }}>{t.chooseTheme}</Text>
           <View style={{ flexDirection: 'row', gap: 15 }}>
             {(Object.keys(COLORS) as ThemeKey[]).map((key) => (
               <TouchableOpacity 
@@ -286,6 +292,7 @@ export default function App() {
               </TouchableOpacity>
             ))}
           </View>
+          <Text style={{ marginTop: 20, color: theme.text, opacity: 0.3, fontSize: 10 }}>v2.0.1</Text>
         </View>
       ) : (
         // Game Scherm
@@ -297,14 +304,14 @@ export default function App() {
                 onPress={stopGame}
                 style={{ padding: 8, backgroundColor: theme.buttonBg, borderRadius: 5 }}
               >
-                <Text style={{ color: theme.errorText, fontWeight: 'bold' }}>STOP</Text>
+                <Text style={{ color: theme.errorText, fontWeight: 'bold' }}>{t.stop}</Text>
               </TouchableOpacity>
             </View>
             <View style={{ alignItems: 'center' }}>
-              <Text style={{ color: theme.text, fontSize: 18, fontWeight: 'bold' }}>{difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}</Text>
+              <Text style={{ color: theme.text, fontSize: 18, fontWeight: 'bold' }}>{t[difficulty]}</Text>
             </View>
             <View style={{ alignItems: 'flex-end' }}>
-              <Text style={{ color: theme.error }}>Fouten: {mistakes}/3</Text>
+              <Text style={{ color: theme.error }}>{t.mistakes}: {mistakes}/3</Text>
             </View>
           </View>
 
@@ -357,6 +364,7 @@ export default function App() {
             theme={theme}
             completedNumbers={completedNumbers}
             highlightedNumber={highlightNumber}
+            t={t}
           />
           {/* Confetti */}
           {isGameWon && (
