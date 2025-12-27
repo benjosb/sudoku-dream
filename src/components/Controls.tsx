@@ -64,11 +64,11 @@ export const Controls: React.FC<Props> = ({
           style={[styles.actionButton, { backgroundColor: isPencilMode ? theme.sameNumber : theme.buttonBg }]} 
           onPress={togglePencil}
         >
-          <Text style={{ color: theme.text }}>{t.pencil} {isPencilMode ? t.on : t.off}</Text>
+          <Text style={{ color: theme.text }}>{isPencilMode ? t.pencilOn : t.pencilOff}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={[styles.actionButton, { backgroundColor: theme.buttonBg }]} onPress={onDelete}>
-          <Text style={{ color: theme.text }}>{t.eraser}</Text>
+          <Text style={{ color: theme.text }}>{t.delete}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={[styles.actionButton, { backgroundColor: '#ff9800' }]} onPress={onHint}>

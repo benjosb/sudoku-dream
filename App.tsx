@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, SafeAreaView, Dimensions, Alert, TouchableOpacity, Switch, StatusBar, Image } from 'react-native';
-import * as Localization from 'expo-localization';
 import { generateSudoku } from './src/logic/SudokuGenerator';
 import { getSmartHint } from './src/logic/SudokuSolver';
 import { Grid, Difficulty } from './src/types';
 import { SudokuCell } from './src/components/SudokuCell';
 import { Controls } from './src/components/Controls';
 import { COLORS, ThemeKey } from './src/constants/theme';
-import { translations, Language } from './src/constants/translations';
 
 import ConfettiCannon from 'react-native-confetti-cannon';
 
@@ -16,11 +14,6 @@ const { width } = Dimensions.get('window');
 const CELL_SIZE = (width - 40) / 9;
 
 export default function App() {
-  // Bepaal taal (nl of en)
-  const deviceLanguage = Localization.getLocales()[0]?.languageCode;
-  const lang: Language = deviceLanguage === 'nl' ? 'nl' : 'en';
-  const t = translations[lang];
-
   // State voor het spel
   const [grid, setGrid] = useState<Grid>([]);
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
@@ -53,11 +46,11 @@ export default function App() {
   // Stop spel en ga terug naar menu
   const stopGame = () => {
     Alert.alert(
-      t.stopTitle,
-      t.stopMessage,
+      "Stoppen?",
+      "Wil je dit spel beëindigen en teruggaan naar het menu?",
       [
-        { text: t.stopCancel, style: "cancel" },
-        { text: t.stopConfirm, style: "destructive", onPress: () => setGameStarted(false) }
+        { text: "Nee, speel verder", style: "cancel" },
+        { text: "Ja, stop", style: "destructive", onPress: () => setGameStarted(false) }
       ]
     );
   };
@@ -67,7 +60,7 @@ export default function App() {
   if (gameStarted && (!grid || grid.length === 0)) {
     return (
       <View style={[styles.container, { backgroundColor: theme.background, justifyContent: 'center' }]}>
-        <Text style={{ color: theme.text }}>{t.loading}</Text>
+        <Text style={{ color: theme.text }}>Sudoku wordt geladen...</Text>
       </View>
     );
   }
@@ -153,7 +146,7 @@ export default function App() {
     if (isComplete) {
         setIsGameWon(true);
         if (confettiRef.current) confettiRef.current.start();
-        Alert.alert(t.wonTitle, t.wonMessage);
+        Alert.alert("GEWONNEN! 🎉", "Wat goed gedaan Noortje!");
     }
   };
 
@@ -186,24 +179,24 @@ export default function App() {
 
         // Als er al iets staat (wat geen error is), hoeven we geen hint te geven
         if (cell.value && !cell.isError) {
-             Alert.alert(t.hintTitle, t.hintCellFilled);
+             Alert.alert("Hint", "Dit vakje is al correct ingevuld!");
              return;
         }
 
         // Als er een fout staat
         if (cell.value && cell.isError) {
-            Alert.alert(t.hintTitle, t.hintCellError);
+            Alert.alert("Hint", "Dit klopt niet helemaal... Probeer het eens te wissen.");
             return;
         }
 
         // Als hij leeg is, geef het antwoord (eerlijk)
         Alert.alert(
-            t.hintAskTitle,
-            t.hintAskMessage,
+            "Hulp Nodig?",
+            "Wil je weten welk getal hier hoort?",
             [
-                { text: t.hintAskNo, style: "cancel" },
+                { text: "Nee, ik puzzel verder", style: "cancel" },
                 { 
-                    text: t.hintAskYes, 
+                    text: "Ja, vertel het me", 
                     onPress: () => {
                         const newGrid = [...grid];
                         newGrid[r][c] = { ...newGrid[r][c], value: cell.solution as any, isError: false };
@@ -216,21 +209,21 @@ export default function App() {
     }
 
     // 2. Als er GEEN cel geselecteerd is, gebruik de slimme solver voor een algemene hint
-    const hint = getSmartHint(grid, lang);
+    const hint = getSmartHint(grid);
     
     if (hint.type === 'none') {
        // Hier komt de fallback tekst uit de solver (geen gokken meer!)
-       Alert.alert(t.hintNoSmartMove, hint.message);
+       Alert.alert("Geen slimme zet gevonden", hint.message);
        return;
     }
 
     Alert.alert(
-      t.hintTitle,
+      "Strategische Hint",
       hint.message,
       [
-        { text: t.hintBtnCancel, style: "cancel" },
+        { text: "Oké, ik ga kijken!", style: "cancel" },
         { 
-          text: t.hintBtnSolve, 
+          text: "Vul in voor mij", 
           onPress: () => {
             const [r, c] = hint.cell;
             const newGrid = [...grid];
@@ -253,26 +246,26 @@ export default function App() {
             source={require('./assets/logo.png')} 
             style={{ width: 150, height: 150, marginBottom: 20, borderRadius: 20 }} 
           />
-          <Text style={[styles.title, { color: theme.text, fontSize: 40, marginBottom: 10 }]}>{t.title}</Text>
-          <Text style={{ color: theme.text, opacity: 0.7, marginBottom: 40 }}>{t.chooseLevel}</Text>
+          <Text style={[styles.title, { color: theme.text, fontSize: 40, marginBottom: 10 }]}>Sudoku Dream</Text>
+          <Text style={{ color: theme.text, opacity: 0.7, marginBottom: 40 }}>Kies je niveau</Text>
           
           <TouchableOpacity style={[styles.menuButton, { backgroundColor: theme.buttonBg }]} onPress={() => startNewGame('easy')}>
-            <Text style={[styles.menuButtonText, { color: theme.text }]}>{t.easy}</Text>
+            <Text style={[styles.menuButtonText, { color: theme.text }]}>Makkelijk</Text>
           </TouchableOpacity>
           
           <TouchableOpacity style={[styles.menuButton, { backgroundColor: theme.buttonBg }]} onPress={() => startNewGame('medium')}>
-            <Text style={[styles.menuButtonText, { color: theme.text }]}>{t.medium}</Text>
+            <Text style={[styles.menuButtonText, { color: theme.text }]}>Gemiddeld</Text>
           </TouchableOpacity>
           
           <TouchableOpacity style={[styles.menuButton, { backgroundColor: theme.buttonBg }]} onPress={() => startNewGame('hard')}>
-            <Text style={[styles.menuButtonText, { color: theme.text }]}>{t.hard}</Text>
+            <Text style={[styles.menuButtonText, { color: theme.text }]}>Moeilijk</Text>
           </TouchableOpacity>
           
           <TouchableOpacity style={[styles.menuButton, { backgroundColor: theme.buttonBg }]} onPress={() => startNewGame('expert')}>
-            <Text style={[styles.menuButtonText, { color: theme.text }]}>{t.expert}</Text>
+            <Text style={[styles.menuButtonText, { color: theme.text }]}>Expert</Text>
           </TouchableOpacity>
 
-          <Text style={{ color: theme.text, marginTop: 40, marginBottom: 10 }}>{t.chooseTheme}</Text>
+          <Text style={{ color: theme.text, marginTop: 40, marginBottom: 10 }}>Kies Thema</Text>
           <View style={{ flexDirection: 'row', gap: 15 }}>
             {(Object.keys(COLORS) as ThemeKey[]).map((key) => (
               <TouchableOpacity 
@@ -293,7 +286,6 @@ export default function App() {
               </TouchableOpacity>
             ))}
           </View>
-          <Text style={{ marginTop: 20, color: theme.text, opacity: 0.3, fontSize: 10 }}>v2.0.0</Text>
         </View>
       ) : (
         // Game Scherm
@@ -305,14 +297,14 @@ export default function App() {
                 onPress={stopGame}
                 style={{ padding: 8, backgroundColor: theme.buttonBg, borderRadius: 5 }}
               >
-                <Text style={{ color: theme.errorText, fontWeight: 'bold' }}>{t.stop}</Text>
+                <Text style={{ color: theme.errorText, fontWeight: 'bold' }}>STOP</Text>
               </TouchableOpacity>
             </View>
             <View style={{ alignItems: 'center' }}>
               <Text style={{ color: theme.text, fontSize: 18, fontWeight: 'bold' }}>{difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}</Text>
             </View>
             <View style={{ alignItems: 'flex-end' }}>
-              <Text style={{ color: theme.error }}>{t.mistakes}: {mistakes}/3</Text>
+              <Text style={{ color: theme.error }}>Fouten: {mistakes}/3</Text>
             </View>
           </View>
 
@@ -365,7 +357,6 @@ export default function App() {
             theme={theme}
             completedNumbers={completedNumbers}
             highlightedNumber={highlightNumber}
-            t={t}
           />
           {/* Confetti */}
           {isGameWon && (
@@ -429,3 +420,4 @@ const styles = StyleSheet.create({
     padding: 20,
   }
 });
+
