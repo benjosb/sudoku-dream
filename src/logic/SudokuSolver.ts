@@ -1,4 +1,5 @@
 import { Grid, Cell } from '../types';
+import { translations, Language } from '../constants/translations';
 
 export interface Hint {
   type: 'last_remaining' | 'naked_single' | 'hidden_single' | 'none';
@@ -34,7 +35,9 @@ const getCandidates = (grid: Grid, row: number, col: number): number[] => {
   return Array.from(candidates);
 };
 
-export const getSmartHint = (grid: Grid): Hint => {
+export const getSmartHint = (grid: Grid, lang: Language = 'en'): Hint => {
+  const t = translations[lang].solver;
+
   // Stap 1: Zoek naar "Last Remaining" (rij/kolom/box met nog 1 leeg vakje)
   // Dit is de makkelijkste strategie voor een mens om te zien.
   
@@ -55,7 +58,7 @@ export const getSmartHint = (grid: Grid): Hint => {
           type: 'last_remaining',
           cell: [r, lastCol],
           value: candidates[0],
-          message: `Kijk naar rij ${r + 1}. Er ontbreekt nog maar één cijfer. Weet jij welke?`
+          message: t.lastRemaining(r + 1)
         };
       }
     }
@@ -71,7 +74,7 @@ export const getSmartHint = (grid: Grid): Hint => {
             type: 'naked_single',
             cell: [r, c],
             value: candidates[0],
-            message: `Kijk eens naar het vakje op rij ${r + 1}, kolom ${c + 1}. Door te kijken naar de rij, kolom en het blok, past hier nog maar één cijfer.`
+            message: t.nakedSingle(r + 1, c + 1)
           };
         }
       }
@@ -105,7 +108,7 @@ export const getSmartHint = (grid: Grid): Hint => {
             type: 'hidden_single',
             cell: [targetR, targetC],
             value: num,
-            message: `Kijk naar het blok waar dit vakje in zit. Het cijfer ${num} kan nergens anders in dit blok staan.`
+            message: t.hiddenSingle(num)
           };
         }
       }
@@ -124,7 +127,7 @@ export const getSmartHint = (grid: Grid): Hint => {
             type: 'none',
             cell: [r, c],
             value: correctValue,
-            message: `Soms moet je gewoon even gokken (of heel diep nadenken!). Hier hoort een ${correctValue}.`
+            message: t.fallback(correctValue)
           };
       }
     }

@@ -12,6 +12,7 @@ interface Props {
   theme: Theme;
   completedNumbers?: number[]; // Optioneel gemaakt
   highlightedNumber?: number | null; // Optioneel gemaakt
+  t: any; // Vertalingen object
 }
 
 export const Controls: React.FC<Props> = ({ 
@@ -23,7 +24,8 @@ export const Controls: React.FC<Props> = ({
   isPencilMode, 
   theme,
   completedNumbers = [], // Default waarde
-  highlightedNumber = null // Default waarde
+  highlightedNumber = null, // Default waarde
+  t
 }) => {
   return (
     <View style={styles.container}>
@@ -34,8 +36,8 @@ export const Controls: React.FC<Props> = ({
           const isHighlighted = highlightedNumber === num;
           
           return (
-          <TouchableOpacity
-            key={num}
+            <TouchableOpacity
+              key={num}
               disabled={isCompleted}
               style={[
                 styles.numberButton, 
@@ -44,10 +46,10 @@ export const Controls: React.FC<Props> = ({
                   opacity: isCompleted ? 0.3 : 1
                 }
               ]}
-            onPress={() => onNumberPress(num)}
-          >
-            <Text style={[styles.numberText, { color: theme.text }]}>{num}</Text>
-          </TouchableOpacity>
+              onPress={() => onNumberPress(num)}
+            >
+              <Text style={[styles.numberText, { color: theme.text }]}>{num}</Text>
+            </TouchableOpacity>
           );
         })}
       </View>
@@ -55,22 +57,22 @@ export const Controls: React.FC<Props> = ({
       {/* Actie knoppen */}
       <View style={styles.actionRow}>
         <TouchableOpacity style={[styles.actionButton, { backgroundColor: theme.buttonBg }]} onPress={onUndo}>
-          <Text style={{ color: theme.text }}>Undo</Text>
+          <Text style={{ color: theme.text }}>{t.undo}</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 
           style={[styles.actionButton, { backgroundColor: isPencilMode ? theme.sameNumber : theme.buttonBg }]} 
           onPress={togglePencil}
         >
-          <Text style={{ color: theme.text }}>Potlood {isPencilMode ? 'AAN' : 'UIT'}</Text>
+          <Text style={{ color: theme.text }}>{t.pencil} {isPencilMode ? t.on : t.off}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={[styles.actionButton, { backgroundColor: theme.buttonBg }]} onPress={onDelete}>
-          <Text style={{ color: theme.text }}>Gum</Text>
+          <Text style={{ color: theme.text }}>{t.eraser}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={[styles.actionButton, { backgroundColor: '#ff9800' }]} onPress={onHint}>
-          <Text style={{ color: '#fff', fontWeight: 'bold' }}>HINT</Text>
+          <Text style={{ color: '#fff', fontWeight: 'bold' }}>{t.hint}</Text>
         </TouchableOpacity>
       </View>
     </View>

@@ -1,6 +1,6 @@
 export const COLORS = {
   light: {
-    name: 'Klassiek',
+    name: 'light',
     background: '#ffffff',
     text: '#000000',
     gridLine: '#333333',
@@ -16,7 +16,7 @@ export const COLORS = {
     previewColor: '#ffffff' // Voor het bolletje
   },
   dark: {
-    name: 'Donker',
+    name: 'dark',
     background: '#121212',
     text: '#ffffff',
     gridLine: '#555555',
@@ -32,7 +32,7 @@ export const COLORS = {
     previewColor: '#121212'
   },
   ocean: {
-    name: 'Oceaan',
+    name: 'ocean',
     background: '#e0f7fa',
     text: '#006064',
     gridLine: '#006064',
@@ -48,7 +48,7 @@ export const COLORS = {
     previewColor: '#006064'
   },
   purple: {
-    name: 'Noortje',
+    name: 'purple',
     background: '#f3e5f5',
     text: '#4a148c',
     gridLine: '#4a148c',
@@ -64,7 +64,7 @@ export const COLORS = {
     previewColor: '#9c27b0'
   },
   midnight: {
-    name: 'Middernacht',
+    name: 'midnight',
     background: '#000022',
     text: '#eeeeff',
     gridLine: '#444488',
