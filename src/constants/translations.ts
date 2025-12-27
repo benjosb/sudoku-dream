@@ -43,7 +43,7 @@ export const translations = {
       lastRemaining: (r: number) => `Kijk naar rij ${r}. Er ontbreekt nog maar één cijfer. Weet jij welke?`,
       nakedSingle: (r: number, c: number) => `Kijk eens naar het vakje op rij ${r}, kolom ${c}. Door te kijken naar de rij, kolom en het blok, past hier nog maar één cijfer.`,
       hiddenSingle: (num: number) => `Kijk naar het blok waar dit vakje in zit. Het cijfer ${num} kan nergens anders in dit blok staan.`,
-      fallback: (val: number) => `Soms moet je gewoon even heel diep nadenken! Hier hoort een ${val}.`
+      fallback: (val: number) => `Ik zie geen logische stap meer, maar ik weet wel het antwoord! Hier hoort een ${val}.`
     }
   },
   en: {
@@ -90,7 +90,7 @@ export const translations = {
       lastRemaining: (r: number) => `Look at row ${r}. Only one number is missing. Do you know which one?`,
       nakedSingle: (r: number, c: number) => `Look at the cell at row ${r}, column ${c}. Based on the row, column, and block, only one number fits here.`,
       hiddenSingle: (num: number) => `Look at the block this cell is in. The number ${num} cannot go anywhere else in this block.`,
-      fallback: (val: number) => `Sometimes you just have to think really hard! A ${val} goes here.`
+      fallback: (val: number) => `I don't see a logical step anymore, but I do know the answer! A ${val} goes here.`
     }
   }
 };

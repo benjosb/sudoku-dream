@@ -9,6 +9,7 @@ import { COLORS, ThemeKey } from './src/constants/theme';
 
 import * as Localization from 'expo-localization';
 import { translations, Language } from './src/constants/translations';
+import ConfettiCannon from 'react-native-confetti-cannon';
 
 const { width } = Dimensions.get('window');
 // Bereken celgrootte (schermbreedte - padding) / 9
@@ -25,9 +26,6 @@ export default function App() {
   const [history, setHistory] = useState<Grid[]>([]);
   const [gameStarted, setGameStarted] = useState(false);
   const [isGameWon, setIsGameWon] = useState(false);
-  
-  // Confetti ref
-  const confettiRef = React.useRef<any>(null);
 
   // Bepaal taal (nl of en)
   const deviceLanguage = Localization.getLocales()[0]?.languageCode;
@@ -101,6 +99,22 @@ export default function App() {
     }
   }, [selectedCell, grid]);
 
+  // WIN DETECTIE - checkt bij ELKE grid wijziging of de puzzel af is
+  useEffect(() => {
+    if (!grid || grid.length === 0 || isGameWon) return;
+    
+    const isComplete = grid.every(row => 
+      row.every(cell => cell.value !== null && cell.value === cell.solution)
+    );
+    
+    if (isComplete) {
+      setIsGameWon(true);
+      setTimeout(() => {
+        Alert.alert(t.wonTitle, t.wonMessage);
+      }, 800); // Iets langer wachten zodat confetti goed zichtbaar is
+    }
+  }, [grid, isGameWon, t]);
+
   // Cijfer invoeren via Controls
   const handleControlPress = (num: number) => {
     // 1. Highlight aanzetten
@@ -146,14 +160,7 @@ export default function App() {
       };
     }
     setGrid(newGrid);
-
-    // Check of spel gewonnen is
-    const isComplete = newGrid.every(row => row.every(cell => cell.value === cell.solution));
-    if (isComplete) {
-        setIsGameWon(true);
-        if (confettiRef.current) confettiRef.current.start();
-        Alert.alert(t.wonTitle, t.wonMessage);
-    }
+    // Win detectie gebeurt nu automatisch via useEffect
   };
 
   // Verwijderen
@@ -185,13 +192,13 @@ export default function App() {
 
         // Als er al iets staat (wat geen error is), hoeven we geen hint te geven
         if (cell.value && !cell.isError) {
-             Alert.alert(t.hintTitle, t.cellCorrect);
+             Alert.alert(t.hintTitle, t.hintCellFilled);
              return;
         }
 
         // Als er een fout staat
         if (cell.value && cell.isError) {
-            Alert.alert(t.hintTitle, t.cellError);
+            Alert.alert(t.hintTitle, t.hintCellError);
             return;
         }
 
@@ -218,8 +225,23 @@ export default function App() {
     const hint = getSmartHint(grid, lang);
     
     if (hint.type === 'none') {
-       // Hier komt de fallback tekst uit de solver (geen gokken meer!)
-       Alert.alert(t.hintNoSmartMove, hint.message);
+       // Hier komt de fallback tekst uit de solver
+       Alert.alert(
+         t.hintNoSmartMove, 
+         hint.message,
+         [
+           { text: t.hintBtnCancel, style: "cancel" },
+           { 
+             text: t.hintBtnSolve, 
+             onPress: () => {
+               const [r, c] = hint.cell;
+               const newGrid = [...grid];
+               newGrid[r][c] = { ...newGrid[r][c], value: hint.value as any, isError: false };
+               setGrid(newGrid);
+             }
+           }
+         ]
+       );
        return;
     }
 
@@ -253,7 +275,7 @@ export default function App() {
             style={{ width: 150, height: 150, marginBottom: 20, borderRadius: 20 }} 
           />
           <Text style={[styles.title, { color: theme.text, fontSize: 40, marginBottom: 10 }]}>{t.title}</Text>
-          <Text style={{ color: theme.text, opacity: 0.7, marginBottom: 40 }}>{t.chooseDifficulty}</Text>
+          <Text style={{ color: theme.text, opacity: 0.7, marginBottom: 40 }}>{t.chooseLevel}</Text>
           
           <TouchableOpacity style={[styles.menuButton, { backgroundColor: theme.buttonBg }]} onPress={() => startNewGame('easy')}>
             <Text style={[styles.menuButtonText, { color: theme.text }]}>{t.easy}</Text>
@@ -292,7 +314,7 @@ export default function App() {
               </TouchableOpacity>
             ))}
           </View>
-          <Text style={{ marginTop: 20, color: theme.text, opacity: 0.3, fontSize: 10 }}>v2.0.1</Text>
+          <Text style={{ marginTop: 20, color: theme.text, opacity: 0.3, fontSize: 10 }}>v2.0.3</Text>
         </View>
       ) : (
         // Game Scherm
@@ -308,7 +330,7 @@ export default function App() {
               </TouchableOpacity>
             </View>
             <View style={{ alignItems: 'center' }}>
-              <Text style={{ color: theme.text, fontSize: 18, fontWeight: 'bold' }}>{t[difficulty]}</Text>
+              <Text style={{ color: theme.text, fontSize: 18, fontWeight: 'bold' }}>{(t as any)[difficulty]}</Text>
             </View>
             <View style={{ alignItems: 'flex-end' }}>
               <Text style={{ color: theme.error }}>{t.mistakes}: {mistakes}/3</Text>
@@ -366,15 +388,17 @@ export default function App() {
             highlightedNumber={highlightNumber}
             t={t}
           />
-          {/* Confetti */}
+          {/* Confetti - absoluut gepositioneerd over hele scherm */}
           {isGameWon && (
-             <ConfettiCannon 
-               count={200} 
-               origin={{x: -10, y: 0}} 
-               ref={confettiRef}
-               autoStart={true}
-               fadeOut={true}
-             />
+            <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 999 }} pointerEvents="none">
+              <ConfettiCannon 
+                count={200} 
+                origin={{x: 200, y: 0}} 
+                autoStart={true}
+                fadeOut={true}
+                fallSpeed={3000}
+              />
+            </View>
           )}
         </>
       )}
