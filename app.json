@@ -2,7 +2,7 @@
   "expo": {
     "name": "Sudoku Dream",
     "slug": "sudoku-dream",
-    "version": "2.0.3",
+    "version": "3.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -18,7 +18,9 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.dickbraam.sudokudream",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSCameraUsageDescription": "We need camera access to scan Sudoku puzzles from newspapers and books.",
+        "NSPhotoLibraryUsageDescription": "We need photo library access to load Sudoku puzzles from your photos."
       }
     },
     "android": {
@@ -26,7 +28,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"]
     },
     "web": {
       "favicon": "./assets/favicon.png"

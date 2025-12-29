@@ -5,6 +5,7 @@ import { getSmartHint } from './src/logic/SudokuSolver';
 import { Grid, Difficulty } from './src/types';
 import { SudokuCell } from './src/components/SudokuCell';
 import { Controls } from './src/components/Controls';
+import { ScanScreen } from './src/components/ScanScreen';
 import { COLORS, ThemeKey } from './src/constants/theme';
 
 import * as Localization from 'expo-localization';
@@ -26,6 +27,7 @@ export default function App() {
   const [history, setHistory] = useState<Grid[]>([]);
   const [gameStarted, setGameStarted] = useState(false);
   const [isGameWon, setIsGameWon] = useState(false);
+  const [showScanScreen, setShowScanScreen] = useState(false);
 
   // Bepaal taal (nl of en)
   const deviceLanguage = Localization.getLocales()[0]?.languageCode;
@@ -45,6 +47,90 @@ export default function App() {
     setSelectedCell(null);
     setGameStarted(true);
     setIsGameWon(false);
+    setShowScanScreen(false);
+  };
+
+  // Start spel met gescande puzzel
+  const startScannedGame = (scannedPuzzle: number[][]) => {
+    // Converteer de gescande puzzel naar ons Grid formaat
+    // We moeten eerst de oplossing berekenen
+    const solution = solveSudoku(scannedPuzzle);
+    
+    if (!solution) {
+      Alert.alert(
+        t.scanFailed,
+        'De gescande puzzel lijkt niet geldig te zijn.'
+      );
+      return;
+    }
+
+    const newGrid: Grid = scannedPuzzle.map((row, rIndex) =>
+      row.map((value, cIndex) => ({
+        row: rIndex,
+        col: cIndex,
+        value: value === 0 ? null : value as any,
+        solution: solution[rIndex][cIndex] as any,
+        isGiven: value !== 0,
+        isError: false,
+        pencilMarks: [],
+      }))
+    );
+
+    setGrid(newGrid);
+    setDifficulty('medium'); // Gescande puzzels krijgen "medium" label
+    setMistakes(0);
+    setHistory([]);
+    setSelectedCell(null);
+    setGameStarted(true);
+    setIsGameWon(false);
+    setShowScanScreen(false);
+    
+    Alert.alert(t.scanSuccess, t.scanSuccessMsg);
+  };
+
+  // Simpele Sudoku solver voor gescande puzzels
+  const solveSudoku = (puzzle: number[][]): number[][] | null => {
+    const grid = puzzle.map(row => [...row]);
+    
+    const isValid = (row: number, col: number, num: number): boolean => {
+      // Check rij
+      for (let i = 0; i < 9; i++) {
+        if (grid[row][i] === num) return false;
+      }
+      // Check kolom
+      for (let i = 0; i < 9; i++) {
+        if (grid[i][col] === num) return false;
+      }
+      // Check 3x3 blok
+      const boxRow = Math.floor(row / 3) * 3;
+      const boxCol = Math.floor(col / 3) * 3;
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+          if (grid[boxRow + i][boxCol + j] === num) return false;
+        }
+      }
+      return true;
+    };
+
+    const solve = (): boolean => {
+      for (let row = 0; row < 9; row++) {
+        for (let col = 0; col < 9; col++) {
+          if (grid[row][col] === 0) {
+            for (let num = 1; num <= 9; num++) {
+              if (isValid(row, col, num)) {
+                grid[row][col] = num;
+                if (solve()) return true;
+                grid[row][col] = 0;
+              }
+            }
+            return false;
+          }
+        }
+      }
+      return true;
+    };
+
+    return solve() ? grid : null;
   };
 
   // Stop spel en ga terug naar menu
@@ -267,7 +353,15 @@ export default function App() {
     <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <StatusBar barStyle={currentTheme === 'light' || currentTheme === 'ocean' ? 'dark-content' : 'light-content'} />
       
-      {!gameStarted ? (
+      {showScanScreen ? (
+        // Scan Scherm
+        <ScanScreen
+          theme={theme}
+          t={t}
+          onPuzzleScanned={startScannedGame}
+          onCancel={() => setShowScanScreen(false)}
+        />
+      ) : !gameStarted ? (
         // Startscherm
         <View style={styles.menuContainer}>
           <Image 
@@ -293,6 +387,14 @@ export default function App() {
             <Text style={[styles.menuButtonText, { color: theme.text }]}>{t.expert}</Text>
           </TouchableOpacity>
 
+          {/* Scan Button */}
+          <TouchableOpacity 
+            style={[styles.menuButton, { backgroundColor: '#4CAF50', marginTop: 20 }]} 
+            onPress={() => setShowScanScreen(true)}
+          >
+            <Text style={[styles.menuButtonText, { color: '#fff' }]}>{t.scanButton}</Text>
+          </TouchableOpacity>
+
           <Text style={{ color: theme.text, marginTop: 40, marginBottom: 10 }}>{t.chooseTheme}</Text>
           <View style={{ flexDirection: 'row', gap: 15 }}>
             {(Object.keys(COLORS) as ThemeKey[]).map((key) => (
@@ -314,7 +416,7 @@ export default function App() {
               </TouchableOpacity>
             ))}
           </View>
-          <Text style={{ marginTop: 20, color: theme.text, opacity: 0.3, fontSize: 10 }}>v2.0.3</Text>
+          <Text style={{ marginTop: 20, color: theme.text, opacity: 0.3, fontSize: 10 }}>v3.0.0</Text>
         </View>
       ) : (
         // Game Scherm
